@@ -1,0 +1,137 @@
+Expense Management Application - Complete File Structure
+=========================================================
+
+Root Files:
+├── package.json              # Dependencies and scripts
+├── vite.config.ts           # Vite configuration
+├── tsconfig.json            # TypeScript config (root)
+├── tsconfig.app.json        # TypeScript config (app)
+├── tsconfig.node.json       # TypeScript config (node)
+├── tailwind.config.js       # Tailwind CSS config
+├── postcss.config.js        # PostCSS config
+├── eslint.config.js         # ESLint config
+├── index.html               # HTML entry point
+├── .env.example             # Environment variables template
+├── README.md                # Full documentation
+├── IMPLEMENTATION.md        # Technical implementation details
+└── QUICKSTART.md            # Quick start guide
+
+src/
+├── main.tsx                 # React entry point
+├── App.tsx                  # Router and route guards (160 lines)
+├── index.css                # Global styles
+├── vite-env.d.ts           # Vite type definitions
+
+├── api/                     # Simulated API Layer (Cookie-backed)
+│   ├── auth.ts             # Signup, login, logout, getCurrentUser
+│   ├── users.ts            # User CRUD, bulk import
+│   ├── expenses.ts         # Expense CRUD, submit, approve, reject
+│   ├── rules.ts            # Approval rules CRUD
+│   └── countries.ts        # External countries API integration
+
+├── components/              # Reusable UI Components
+│   ├── Layout.tsx          # App layout with navigation (100 lines)
+│   ├── ExpenseForm.tsx     # Expense creation/edit form (350 lines)
+│   ├── ReceiptScanner.tsx  # OCR receipt scanner modal (100 lines)
+│   ├── ApprovalTimeline.tsx # Approval step visualization (80 lines)
+│   └── RuleEditor.tsx      # Approval rule creation modal (180 lines)
+
+├── pages/                   # Route Pages
+│   ├── Signup.tsx          # Registration with country/currency (180 lines)
+│   ├── Login.tsx           # Authentication (120 lines)
+│   ├── Dashboard.tsx       # Stats and recent expenses (150 lines)
+│   ├── Expenses.tsx        # Expense list with filters (140 lines)
+│   ├── NewExpense.tsx      # New expense wrapper (15 lines)
+│   ├── ExpenseDetail.tsx   # Expense detail with approval actions (250 lines)
+│   ├── Users.tsx           # User management with CSV import (280 lines)
+│   ├── Rules.tsx           # Approval rules management (180 lines)
+│   ├── Settings.tsx        # Company settings (90 lines)
+│   └── CookieInspector.tsx # Debug tool for cookie data (120 lines)
+
+├── state/                   # State Management
+│   └── useAppStore.ts      # Zustand store for app state (60 lines)
+
+├── utils/                   # Utility Functions
+│   ├── cookieStore.ts      # Cookie CRUD with versioning (150 lines)
+│   ├── currency.ts         # Exchange rate API and conversion (60 lines)
+│   ├── rules.ts            # Approval rule evaluation engine (100 lines)
+│   ├── ocr.ts              # Simulated OCR parsing (50 lines)
+│   └── seedData.ts         # Demo data generator (90 lines)
+
+└── types/                   # TypeScript Type Definitions
+    └── index.ts            # All app types (120 lines)
+
+Key Statistics:
+===============
+Total Files: 28 TypeScript/React files
+Total Lines: ~4,700 lines of code
+Components: 5 reusable components
+Pages: 10 route pages
+API Modules: 5 simulated APIs
+Utilities: 5 helper modules
+
+Features Implemented:
+=====================
+✓ Authentication (signup, login, session)
+✓ User Management (CRUD, roles, CSV import)
+✓ Expense Submission (multi-line, attachments, OCR)
+✓ Multi-level Approval Workflow
+✓ Approval Rules Engine (percentage, specific, hybrid)
+✓ Currency Conversion (real-time with caching)
+✓ Cookie-based Persistence (versioned)
+✓ Debug Cookie Inspector
+✓ Responsive UI (Tailwind CSS)
+✓ Form Validation (Zod + React Hook Form)
+✓ Type Safety (Full TypeScript)
+✓ Production Build (Vite)
+
+External APIs:
+==============
+- restcountries.com/v3.1/all (countries & currencies)
+- api.exchangerate-api.com/v4/latest (exchange rates)
+
+Cookie Storage:
+===============
+expapp_users        - User accounts array
+expapp_company      - Company settings object
+expapp_expenses     - Expenses array
+expapp_rules        - Approval rules array
+expapp_session      - Current session
+expapp_prefs        - UI preferences
+expapp_rates_*      - Exchange rate cache per currency
+
+Tech Stack:
+===========
+- React 18 + TypeScript
+- Vite (build tool)
+- React Router v6
+- Zustand (state)
+- React Query (API cache)
+- React Hook Form + Zod
+- Tailwind CSS
+- Lucide Icons
+- Axios, js-cookie, papaparse
+
+Build Output:
+=============
+dist/index.html                 0.46 kB
+dist/assets/index.css          18.61 kB
+dist/assets/index.js          440.98 kB (134 kB gzipped)
+
+Development:
+============
+npm install     - Install dependencies
+npm run dev     - Start dev server (http://localhost:5173)
+npm run build   - Build for production
+npm run preview - Preview production build
+npm run typecheck - TypeScript validation
+npm run lint    - ESLint checks
+
+Demo Credentials:
+=================
+Admin:    admin@demo.com / admin123
+Manager:  manager@demo.com / manager123
+Finance:  finance@demo.com / finance123
+Employee: employee@demo.com / employee123
+
+Use Cookie Inspector → "Seed Demo Data" to populate

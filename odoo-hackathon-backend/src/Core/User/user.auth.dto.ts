@@ -1,10 +1,9 @@
-import { IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator';
 
 export class UserAuthDto {
-  @IsNotEmpty({ message: 'Phone number is required' })
-  @IsString()
-  @Matches(/^[0-9]{10}$/, { message: 'Phone number must be 10 digits' })
-  userphone: string;
+  @IsEmail({}, { message: 'A valid email address is required' })
+  @IsNotEmpty({ message: 'Email is required' })
+  email: string;
 
   @IsNotEmpty({ message: 'Password is required' })
   @IsString()

@@ -30,7 +30,7 @@ export class AuthService {
   async getUserProfileByPhoneNumber(usermobile: string): Promise<CreateUserDto & { id: string }> {
     try {
       const db = fb.getFirestore();
-      const snapShot = await db.collection(COLLECTION.Auth).where('userphone', '==', usermobile).get();
+      const snapShot = await db.collection(COLLECTION.Auth).where('email', '==', usermobile).get();
       if (snapShot.empty) {
         throw new NotFoundException(message.error.user_not_found);
       }
@@ -46,7 +46,7 @@ export class AuthService {
 
   async isUserExists(mobileNumber: string) {
     const db = fb.getFirestore();
-    const userSnapshot = await db.collection(COLLECTION.Auth).where('userphone', '==', mobileNumber).get();
+    const userSnapshot = await db.collection(COLLECTION.Auth).where('email', '==', mobileNumber).get();
     return !userSnapshot.empty;
   }
 
@@ -104,8 +104,8 @@ export class AuthService {
 
   generateJWT(payload: CreateUserDto) {
     const tokenPayload = {
-      useremail: payload.useremail,
-      userphone: payload.userphone,
+      username: payload.name,
+      email: payload.email,
     };
     return jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '30d' });
   }
@@ -113,18 +113,18 @@ export class AuthService {
     generateJWTCompany(payload: CompanyDto) {
     const tokenPayload = {
       useremail: payload.email,
-      userphone: payload.name,
+      email: payload.name,
     };
     return jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '30d' });
   }
   async registerUser(userProfile: CreateUserDto) {
-    const isUserExists = await this.isUserExists(userProfile.userphone);
+    const isUserExists = await this.isUserExists(userProfile.email);
     if (isUserExists) {
       throw new BadRequestException(message.error.user_already_exists);
     }
 
     await this.addUserAuth({
-      userphone: userProfile.userphone,
+      email: userProfile.email,
       password: userProfile.password,
       verified : false
     });
@@ -155,9 +155,9 @@ export class AuthService {
     return { success: true, status: HttpStatus.OK, data: { token, message: message.success.user_registered } };
   }
 
-  async getUserAuth(userphone: string): Promise<UserAuthDto> {
+  async getUserAuth(email: string): Promise<UserAuthDto> {
     const db = fb.getFirestore();
-    const snap = await db.collection(COLLECTION.Auth).where('userphone', '==', userphone).get();
+    const snap = await db.collection(COLLECTION.Auth).where('email', '==', email).get();
     if (snap.empty) throw new NotFoundException(message.error.user_not_found);
     return snap.docs[0].data() as UserAuthDto;
   }
@@ -166,30 +166,30 @@ export class AuthService {
     return await comparePassword(password, hash);
   }
 
-  async getUserProfileByMobileNumber(userphone: string, userId?: string) {
+  async getUserProfileByMobileNumber(email: string, userId?: string) {
     const db = fb.getFirestore();
-    const snapShot = await db.collection(COLLECTION.Profile).where('userphone', '==', userphone).get();
+    const snapShot = await db.collection(COLLECTION.Profile).where('email', '==', email).get();
     if (snapShot.empty) throw new NotFoundException(message.error.user_not_found);
     return { userProfile: snapShot.docs[0].data() as CreateUserDto, id: snapShot.docs[0].id || null };
   }
 
   async loginUser(loginDto: UserAuthDto) {
-    const userAuth = await this.getUserAuth(loginDto.userphone);
+    const userAuth = await this.getUserAuth(loginDto.email);
     const isPasswordValid = await this.validatePassword(loginDto.password, userAuth.password);
 
     if (!isPasswordValid) {
       throw new BadRequestException(message.error.invalid_credentials);
     }
 
-    const userProfile = await this.getUserProfileByMobileNumber(loginDto.userphone);
+    const userProfile = await this.getUserProfileByMobileNumber(loginDto.email);
 
     const token = this.generateJWT(userProfile.userProfile);
 
-    return { success: true, status: HttpStatus.OK, data: { token, userphone: loginDto.userphone, message: message.success.login_successful } };
+    return { success: true, status: HttpStatus.OK, data: { token, email: loginDto.email, message: message.success.login_successful } };
   }
 
   async updateUserProfile(userProfileRequest: Partial<CreateUserDto>, userId?: string) {
-    const { userProfile, id } = await this.getUserProfileByMobileNumber(userProfileRequest.userphone);
+    const { userProfile, id } = await this.getUserProfileByMobileNumber(userProfileRequest.email);
     if (!userProfile || !id) {
       throw new NotFoundException(message.error.user_not_found);
     }
@@ -200,14 +200,14 @@ export class AuthService {
 
   
   async resetPassword(loginDto: UserAuthDto , userId?: string) {
-    const userAuth = await this.getUserAuth(loginDto.userphone);
+    const userAuth = await this.getUserAuth(loginDto.email);
     const isDuplicate = await this.validatePassword(loginDto.password, userAuth.password);
     if (isDuplicate) {
       throw new ConflictException('Same password not allowed');
     }
 
     await this.updateUserAuth({
-      userphone: loginDto.userphone,
+      email: loginDto.email,
       password: loginDto.password,
     });
 
@@ -222,7 +222,7 @@ export class AuthService {
 
     // find user by phone
     const snapshot = await usersRef
-      .where('userphone', '==', userAuthDto.userphone)
+      .where('email', '==', userAuthDto.email)
       .limit(1)
       .get();
 

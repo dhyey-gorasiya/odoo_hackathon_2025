@@ -1,21 +1,27 @@
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Plus, X, Upload } from 'lucide-react';
-import Papa from 'papaparse';
-import Layout from '../components/Layout';
-import { useAppStore } from '../state/useAppStore';
-import { listUsers, createUser, updateUser, bulkImportUsers } from '../api/users';
-import type { User, UserRole } from '../types';
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Plus, X, Upload } from "lucide-react";
+import Papa from "papaparse";
+import Layout from "../components/Layout";
+import { useAppStore } from "../state/useAppStore";
+import {
+  listUsers,
+  createUser,
+  updateUser,
+  bulkImportUsers
+} from "../api/users";
+import type { User, UserRole } from "../types";
+import { toast, ToastContainer } from "react-toastify";
 
 const userSchema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  name: z.string().min(2, 'Name required'),
-  role: z.enum(['employee', 'manager', 'finance', 'director', 'admin']),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(2, "Name required"),
+  role: z.enum(["employee", "manager", "finance", "director", "admin"]),
   managerId: z.string().optional(),
-  isManagerApprover: z.boolean().optional(),
+  isManagerApprover: z.boolean().optional()
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -32,9 +38,9 @@ export default function Users() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors }
   } = useForm<UserFormData>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(userSchema)
   });
 
   useEffect(() => {
@@ -47,7 +53,7 @@ export default function Users() {
       const data = await listUsers(company?.id);
       setUsers(data);
     } catch (error) {
-      console.error('Failed to load users:', error);
+      console.error("Failed to load users:", error);
     } finally {
       setLoading(false);
     }
@@ -59,19 +65,24 @@ export default function Users() {
     try {
       if (editingUser) {
         await updateUser(editingUser.id, data);
+        toast.success("User updated successfully ✅");
       } else {
         await createUser({
           ...data,
           companyId: company.id,
-          isManagerApprover: data.isManagerApprover || false,
+          isManagerApprover: data.isManagerApprover || false
         });
+        toast.success("User created successfully 🎉");
       }
+
       await loadUsers();
       setShowModal(false);
       setEditingUser(null);
       reset();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to save user');
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save user"
+      );
     }
   };
 
@@ -83,10 +94,11 @@ export default function Users() {
       name: user.name,
       role: user.role,
       managerId: user.managerId,
-      isManagerApprover: user.isManagerApprover,
+      isManagerApprover: user.isManagerApprover
     });
     setShowModal(true);
   };
+
 
   const handleCSVImport = (file: File) => {
     Papa.parse(file, {
@@ -96,33 +108,43 @@ export default function Users() {
           .filter((row: any) => row.email && row.name)
           .map((row: any) => ({
             email: row.email,
-            password: row.password || 'default123',
+            password: row.password || "default123",
             name: row.name,
-            role: (row.role || 'employee') as UserRole,
+            role: (row.role || "employee") as UserRole,
             companyId: company!.id,
             managerId: row.managerId || undefined,
-            isManagerApprover: row.isManagerApprover === 'true',
+            isManagerApprover: row.isManagerApprover === "true"
           }));
 
         try {
           const result = await bulkImportUsers(importData);
-          alert(
-            `Imported ${result.success.length} users. ${result.errors.length} errors.`
+
+          // ✅ Success toast with dynamic message
+          toast.success(
+            `Imported ${result.success.length} users successfully 🎉`
           );
+
+          // ⚠️ If there are any import errors, show warning toast
           if (result.errors.length > 0) {
-            console.error('Import errors:', result.errors);
+            toast.warning(
+              `${result.errors.length} records failed to import ⚠️`
+            );
+            console.error("Import errors:", result.errors);
           }
+
           await loadUsers();
           setShowImport(false);
         } catch (error) {
-          alert('Failed to import users');
+          // ❌ Error toast
+          toast.error("Failed to import users ❌");
         }
-      },
+      }
     });
   };
 
   return (
     <Layout>
+        <ToastContainer position="top-right" autoClose={2000} />
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">Users</h1>
@@ -138,12 +160,12 @@ export default function Users() {
               onClick={() => {
                 setEditingUser(null);
                 reset({
-                  email: '',
-                  password: '',
-                  name: '',
-                  role: 'employee',
+                  email: "",
+                  password: "",
+                  name: "",
+                  role: "employee",
                   managerId: undefined,
-                  isManagerApprover: false,
+                  isManagerApprover: false
                 });
                 setShowModal(true);
               }}
@@ -186,14 +208,16 @@ export default function Users() {
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         {user.name}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {user.email}
+                      </td>
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
                           {user.role}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
-                        {user.isManagerApprover ? 'Yes' : 'No'}
+                        {user.isManagerApprover ? "Yes" : "No"}
                       </td>
                       <td className="px-6 py-4">
                         <button
@@ -217,7 +241,7 @@ export default function Users() {
           <div className="bg-white rounded-lg w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">
-                {editingUser ? 'Edit User' : 'Add User'}
+                {editingUser ? "Edit User" : "Add User"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -233,11 +257,13 @@ export default function Users() {
                   Name
                 </label>
                 <input
-                  {...register('name')}
+                  {...register("name")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.name.message}
+                  </p>
                 )}
               </div>
 
@@ -246,12 +272,14 @@ export default function Users() {
                   Email
                 </label>
                 <input
-                  {...register('email')}
+                  {...register("email")}
                   type="email"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -260,12 +288,14 @@ export default function Users() {
                   Password
                 </label>
                 <input
-                  {...register('password')}
+                  {...register("password")}
                   type="password"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
                 {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -274,7 +304,7 @@ export default function Users() {
                   Role
                 </label>
                 <select
-                  {...register('role')}
+                  {...register("role")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="employee">Employee</option>
@@ -290,12 +320,12 @@ export default function Users() {
                   Manager
                 </label>
                 <select
-                  {...register('managerId')}
+                  {...register("managerId")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">No Manager</option>
                   {users
-                    .filter((u) => u.role === 'manager' || u.role === 'admin')
+                    .filter((u) => u.role === "manager" || u.role === "admin")
                     .map((u) => (
                       <option key={u.id} value={u.id}>
                         {u.name}
@@ -306,7 +336,7 @@ export default function Users() {
 
               <div className="flex items-center">
                 <input
-                  {...register('isManagerApprover')}
+                  {...register("isManagerApprover")}
                   type="checkbox"
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
@@ -327,7 +357,7 @@ export default function Users() {
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  {editingUser ? 'Update' : 'Create'}
+                  {editingUser ? "Update" : "Create"}
                 </button>
               </div>
             </form>
@@ -339,7 +369,9 @@ export default function Users() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Import Users (CSV)</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                Import Users (CSV)
+              </h2>
               <button
                 onClick={() => setShowImport(false)}
                 className="p-1 hover:bg-gray-100 rounded-lg"
@@ -350,8 +382,8 @@ export default function Users() {
 
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                Upload a CSV file with columns: email, name, password, role, managerId,
-                isManagerApprover
+                Upload a CSV file with columns: email, name, password, role,
+                managerId, isManagerApprover
               </p>
 
               <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">

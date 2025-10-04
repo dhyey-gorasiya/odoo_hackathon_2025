@@ -34,10 +34,10 @@ export default function Layout({ children }: LayoutProps) {
     { path: '/expenses', icon: Receipt, label: 'Expenses' },
     ...(user?.role === 'admin'
       ? [
-          { path: '/users', icon: Users, label: 'Users' },
-          { path: '/rules', icon: FileText, label: 'Approval Rules' },
-          { path: '/settings', icon: Settings, label: 'Settings' },
-        ]
+        { path: '/users', icon: Users, label: 'Users' },
+        { path: '/rules', icon: FileText, label: 'Approval Rules' },
+        { path: '/settings', icon: Settings, label: 'Settings' },
+      ]
       : []),
   ];
 
@@ -49,9 +49,10 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <Receipt className="w-6 h-6 text-blue-600" />
+              <img src="/odoo_logo1.png" alt="App Logo" className="w-14 h-14 object-contain" />
               <span className="text-lg sm:text-xl font-bold text-gray-900">
-                Oddo Expense App
+                <span style={{ color: '#8b4c7fff' }}>E</span><span style={{ color: '#90898fff' }}>xpense</span>
+                <span style={{ color: '#8b4c7fff' }}> A</span><span style={{ color: '#90898fff' }}>pp</span>
               </span>
             </div>
 
@@ -64,11 +65,10 @@ export default function Layout({ children }: LayoutProps) {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition ${isActive
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     {item.label}
@@ -117,11 +117,10 @@ export default function Layout({ children }: LayoutProps) {
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${isActive
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     {item.label}

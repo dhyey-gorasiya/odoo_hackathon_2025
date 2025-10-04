@@ -89,18 +89,7 @@ export default function Settings() {
             </button>
           </form>
         </div>
-
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-            Security Notice
-          </h3>
-          <p className="text-sm text-yellow-800">
-            This is a prototype application. All data is stored in browser cookies for
-            demonstration purposes. In production, sensitive data should be stored
-            server-side with proper encryption and HttpOnly cookies for session
-            management.
-          </p>
-        </div>
+        
       </div>
     </Layout>
   );

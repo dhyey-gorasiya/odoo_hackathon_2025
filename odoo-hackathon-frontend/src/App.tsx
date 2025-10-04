@@ -1,25 +1,26 @@
-import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAppStore } from './state/useAppStore';
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAppStore } from "./state/useAppStore";
+import "react-toastify/dist/ReactToastify.css";
 
-import Signup from './pages/Signup';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Expenses from './pages/Expenses';
-import NewExpense from './pages/NewExpense';
-import ExpenseDetail from './pages/ExpenseDetail';
-import Users from './pages/Users';
-import Rules from './pages/Rules';
-import Settings from './pages/Settings';
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Expenses from "./pages/Expenses";
+import NewExpense from "./pages/NewExpense";
+import ExpenseDetail from "./pages/ExpenseDetail";
+import Users from "./pages/Users";
+import Rules from "./pages/Rules";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
+      retry: 1
+    }
+  }
 });
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {

@@ -125,7 +125,7 @@ export default function Login() {
             </Link>
           </p>
 
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+          {/* <div className="mt-8 p-4 bg-blue-50 rounded-lg">
             <p className="text-xs font-semibold text-blue-900 mb-2">
               Demo Credentials:
             </p>
@@ -133,7 +133,7 @@ export default function Login() {
               <p>Admin: admin@demo.com / admin123</p>
               <p>Employee: employee@demo.com / employee123</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </>

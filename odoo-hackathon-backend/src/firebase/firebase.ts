@@ -4,7 +4,7 @@ import * as path from 'path';
 
 const setupFirebase = () => {
 
-const serviceAccount = require(path.join(__dirname, '..', '..', 'src/firebase/demoapp-ca97d-firebase-adminsdk-lttsw-8aa9a3c89b.json'));
+const serviceAccount = require(path.join(__dirname, '..', '..', 'src/firebase/demoapp-ca97d-firebase-adminsdk-lttsw-448b17d40a.json'));
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET

@@ -1,66 +1,150 @@
-import { useState } from 'react';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LoginForm } from './components/auth/LoginForm';
-import { Sidebar } from './components/layout/Sidebar';
-import { ExpenseDashboard } from './components/dashboard/ExpenseDashboard';
-import { ExpenseList } from './components/expenses/ExpenseList';
-import { ExpenseSubmitForm } from './components/expenses/ExpenseSubmitForm';
-import { ApprovalQueue } from './components/approvals/ApprovalQueue';
-import { UserManagement } from './components/admin/UserManagement';
-import { ApprovalRules } from './components/admin/ApprovalRules';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAppStore } from './state/useAppStore';
 
-function AppContent() {
-  const { user, isLoading } = useAuth();
-  const [activeView, setActiveView] = useState('dashboard');
+import Signup from './pages/Signup';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Expenses from './pages/Expenses';
+import NewExpense from './pages/NewExpense';
+import ExpenseDetail from './pages/ExpenseDetail';
+import Users from './pages/Users';
+import Rules from './pages/Rules';
+import Settings from './pages/Settings';
 
-  if (isLoading) {
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading, isInitialized } = useAppStore();
+
+  if (!isInitialized || isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
       </div>
     );
   }
 
   if (!user) {
-    return <LoginForm />;
+    return <Navigate to="/login" replace />;
   }
 
-  const renderView = () => {
-    switch (activeView) {
-      case 'dashboard':
-        return <ExpenseDashboard />;
-      case 'expenses':
-        return <ExpenseList />;
-      case 'submit':
-        return <ExpenseSubmitForm />;
-      case 'approvals':
-        return <ApprovalQueue />;
-      case 'users':
-        return <UserManagement />;
-      case 'settings':
-        return <ApprovalRules />;
-      default:
-        return <ExpenseDashboard />;
-    }
-  };
+  return <>{children}</>;
+}
 
-  return (
-    <div className="flex h-screen bg-slate-50">
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-8">
-          {renderView()}
-        </div>
-      </main>
-    </div>
-  );
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading, isInitialized } = useAppStore();
+
+  if (!isInitialized || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
 }
 
 function App() {
+  const { hydrate } = useAppStore();
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <Signup />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expenses"
+            element={
+              <ProtectedRoute>
+                <Expenses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expenses/new"
+            element={
+              <ProtectedRoute>
+                <NewExpense />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expenses/:id"
+            element={
+              <ProtectedRoute>
+                <ExpenseDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rules"
+            element={
+              <ProtectedRoute>
+                <Rules />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

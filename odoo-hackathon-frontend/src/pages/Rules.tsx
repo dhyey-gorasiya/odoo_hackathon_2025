@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import { Plus, Play } from 'lucide-react';
 import Layout from '../components/Layout';
@@ -22,7 +23,6 @@ export default function Rules() {
 
   const loadData = async () => {
     if (!company) return;
-
     try {
       const [rulesData, usersData] = await Promise.all([
         listRules(company.id),
@@ -35,17 +35,14 @@ export default function Rules() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSaveRule = async (data: any) => {
     if (!company) return;
-
     try {
       if (editingRule) {
         await updateRule(editingRule.id, data);
       } else {
-        await createRule({
-          ...data,
-          companyId: company.id,
-        });
+        await createRule({ ...data, companyId: company.id });
       }
       await loadData();
       setShowEditor(false);
@@ -87,10 +84,11 @@ export default function Rules() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Approval Rules</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Approval Rules</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
               Configure automated approval workflows
             </p>
           </div>
@@ -99,16 +97,17 @@ export default function Rules() {
               setEditingRule(null);
               setShowEditor(true);
             }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+            className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
           >
             <Plus className="w-5 h-5" />
             New Rule
           </button>
         </div>
 
+        {/* TEST RESULT SECTION */}
         {testResult && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <pre className="text-sm text-green-900 whitespace-pre-wrap">{testResult}</pre>
+            <pre className="text-sm text-green-900 whitespace-pre-wrap break-words">{testResult}</pre>
             <button
               onClick={() => setTestResult(null)}
               className="mt-2 text-sm text-green-700 hover:text-green-800"
@@ -118,15 +117,17 @@ export default function Rules() {
           </div>
         )}
 
+        {/* RULES LIST */}
         <div className="space-y-4">
           {rules.map((rule) => (
             <div
               key={rule.id}
-              className="bg-white rounded-lg border border-gray-200 p-6"
+              className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm"
             >
-              <div className="flex items-start justify-between mb-4">
+              {/* RULE HEADER */}
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-lg font-semibold text-gray-900">{rule.name}</h3>
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -146,17 +147,18 @@ export default function Rules() {
                   )}
                 </div>
 
-                <div className="flex gap-2">
+                {/* ACTION BUTTONS */}
+                <div className="flex flex-wrap sm:flex-nowrap gap-2">
                   <button
                     onClick={() => handleTestRule(rule)}
-                    className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center gap-1 text-sm"
+                    className="flex items-center justify-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm"
                   >
                     <Play className="w-4 h-4" />
                     Test
                   </button>
                   <button
                     onClick={() => handleToggleActive(rule)}
-                    className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm"
+                    className="flex items-center justify-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm"
                   >
                     {rule.isActive ? 'Deactivate' : 'Activate'}
                   </button>
@@ -165,13 +167,14 @@ export default function Rules() {
                       setEditingRule(rule);
                       setShowEditor(true);
                     }}
-                    className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm"
+                    className="flex items-center justify-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm"
                   >
                     Edit
                   </button>
                 </div>
               </div>
 
+              {/* APPROVAL SEQUENCE */}
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-2">
                   Approval Sequence:
@@ -191,6 +194,7 @@ export default function Rules() {
                 </div>
               </div>
 
+              {/* SPECIFIC APPROVERS */}
               {rule.specificApproverIds && rule.specificApproverIds.length > 0 && (
                 <div className="mt-4">
                   <h4 className="text-sm font-medium text-gray-700 mb-2">
@@ -214,12 +218,15 @@ export default function Rules() {
             </div>
           ))}
 
+          {/* EMPTY STATE */}
           {rules.length === 0 && (
-            <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-              <p className="text-gray-600 mb-4">No approval rules configured</p>
+            <div className="bg-white rounded-lg border border-gray-200 p-8 sm:p-12 text-center">
+              <p className="text-gray-600 mb-4 text-sm sm:text-base">
+                No approval rules configured
+              </p>
               <button
                 onClick={() => setShowEditor(true)}
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-5 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition text-sm sm:text-base"
               >
                 <Plus className="w-5 h-5" />
                 Create First Rule
@@ -229,6 +236,7 @@ export default function Rules() {
         </div>
       </div>
 
+      {/* RULE EDITOR MODAL */}
       {showEditor && (
         <RuleEditor
           users={users}

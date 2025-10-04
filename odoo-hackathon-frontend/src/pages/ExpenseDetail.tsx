@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { ArrowLeft, Download } from 'lucide-react';
-import Layout from '../components/Layout';
-import ApprovalTimeline from '../components/ApprovalTimeline';
-import { useAppStore } from '../state/useAppStore';
-import { getExpense, approveExpense, rejectExpense } from '../api/expenses';
-import type { Expense } from '../types';
-import { formatCurrency } from '../utils/currency';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { ArrowLeft, Download } from "lucide-react";
+import Layout from "../components/Layout";
+import ApprovalTimeline from "../components/ApprovalTimeline";
+import { useAppStore } from "../state/useAppStore";
+import { getExpense, approveExpense, rejectExpense } from "../api/expenses";
+import type { Expense } from "../types";
+import { formatCurrency } from "../utils/currency";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function ExpenseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,10 +19,10 @@ export default function ExpenseDetail() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const { register, watch } = useForm<{ comment: string }>({
-    defaultValues: { comment: '' },
+    defaultValues: { comment: "" }
   });
 
-  const comment = watch('comment');
+  const comment = watch("comment");
 
   useEffect(() => {
     loadExpense();
@@ -35,7 +36,7 @@ export default function ExpenseDetail() {
       const data = await getExpense(id);
       setExpense(data);
     } catch (error) {
-      console.error('Failed to load expense:', error);
+      console.error("Failed to load expense:", error);
     } finally {
       setLoading(false);
     }
@@ -46,10 +47,20 @@ export default function ExpenseDetail() {
 
     setActionLoading(true);
     try {
-      await approveExpense(expense.id, user.id, comment || undefined, company?.currency);
+      await approveExpense(
+        expense.id,
+        user.id,
+        comment || undefined,
+        company?.currency
+      );
       await loadExpense();
+
+      toast.success("Expense approved successfully 🎉");
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to approve expense');
+      // Show error toast
+      toast.error(
+        error instanceof Error ? error.message : "Failed to approve expense"
+      );
     } finally {
       setActionLoading(false);
     }
@@ -57,7 +68,7 @@ export default function ExpenseDetail() {
 
   const handleReject = async () => {
     if (!expense || !user || !comment.trim()) {
-      alert('Please provide a comment for rejection');
+      toast.warning("Please provide a comment for rejection ⚠️");
       return;
     }
 
@@ -65,8 +76,14 @@ export default function ExpenseDetail() {
     try {
       await rejectExpense(expense.id, user.id, comment);
       await loadExpense();
+
+      // Success toast
+      toast.success("Expense rejected successfully");
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to reject expense');
+      // Error toast
+      toast.error(
+        error instanceof Error ? error.message : "Failed to reject expense"
+      );
     } finally {
       setActionLoading(false);
     }
@@ -91,11 +108,13 @@ export default function ExpenseDetail() {
   }
 
   const canApprove =
-    expense.approvalTimeline[expense.currentApproverIndex]?.approverId === user?.id &&
-    (expense.status === 'submitted' || expense.status === 'pending');
+    expense.approvalTimeline[expense.currentApproverIndex]?.approverId ===
+      user?.id &&
+    (expense.status === "submitted" || expense.status === "pending");
 
   return (
     <Layout>
+      <ToastContainer position="top-right" autoClose={2000} />
       <div className="space-y-6">
         <button
           onClick={() => navigate(-1)}
@@ -107,18 +126,20 @@ export default function ExpenseDetail() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Expense Details</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Expense Details
+            </h1>
             <p className="text-gray-600 mt-1">#{expense.id.slice(0, 8)}</p>
           </div>
           <span
             className={`px-4 py-2 text-sm font-medium rounded-full ${
-              expense.status === 'approved'
-                ? 'bg-green-100 text-green-700'
-                : expense.status === 'rejected'
-                ? 'bg-red-100 text-red-700'
-                : expense.status === 'draft'
-                ? 'bg-gray-100 text-gray-700'
-                : 'bg-yellow-100 text-yellow-700'
+              expense.status === "approved"
+                ? "bg-green-100 text-green-700"
+                : expense.status === "rejected"
+                ? "bg-red-100 text-red-700"
+                : expense.status === "draft"
+                ? "bg-gray-100 text-gray-700"
+                : "bg-yellow-100 text-yellow-700"
             }`}
           >
             {expense.status}
@@ -135,11 +156,15 @@ export default function ExpenseDetail() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-600">Description</p>
-                  <p className="font-medium text-gray-900">{expense.description}</p>
+                  <p className="font-medium text-gray-900">
+                    {expense.description}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Category</p>
-                  <p className="font-medium text-gray-900">{expense.category}</p>
+                  <p className="font-medium text-gray-900">
+                    {expense.category}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Amount</p>
@@ -148,7 +173,11 @@ export default function ExpenseDetail() {
                   </p>
                   {expense.convertedAmount && expense.conversionRate && (
                     <p className="text-sm text-gray-500 mt-1">
-                      ≈ {formatCurrency(expense.convertedAmount, company?.currency || 'USD')}{' '}
+                      ≈{" "}
+                      {formatCurrency(
+                        expense.convertedAmount,
+                        company?.currency || "USD"
+                      )}{" "}
                       (rate {expense.conversionRate.toFixed(4)})
                     </p>
                   )}
@@ -161,7 +190,9 @@ export default function ExpenseDetail() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Submitted By</p>
-                  <p className="font-medium text-gray-900">{expense.userName}</p>
+                  <p className="font-medium text-gray-900">
+                    {expense.userName}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Submitted On</p>
@@ -183,7 +214,9 @@ export default function ExpenseDetail() {
                     className="flex justify-between items-start p-3 bg-gray-50 rounded-lg"
                   >
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">{line.description}</p>
+                      <p className="font-medium text-gray-900">
+                        {line.description}
+                      </p>
                       <p className="text-sm text-gray-600">{line.category}</p>
                     </div>
                     <p className="font-medium text-gray-900">
@@ -206,7 +239,9 @@ export default function ExpenseDetail() {
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                     >
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900">{attachment.name}</p>
+                        <p className="font-medium text-gray-900">
+                          {attachment.name}
+                        </p>
                         <p className="text-sm text-gray-600">
                           {(attachment.size / 1024).toFixed(1)} KB
                         </p>
@@ -248,7 +283,7 @@ export default function ExpenseDetail() {
                       Comment (optional for approval, required for rejection)
                     </label>
                     <textarea
-                      {...register('comment')}
+                      {...register("comment")}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       placeholder="Add a comment..."
